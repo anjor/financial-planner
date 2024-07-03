@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import numpy as np
 
 
 def calculate_projection(
     initial_net_worth,
     annual_income,
     annual_expenses,
+    inflation_rate,
     growth_rate,
     years,
     retirement_age,
@@ -15,13 +15,19 @@ def calculate_projection(
 ):
     net_worth = [initial_net_worth]
     for year in range(1, years + 1):
+        # Adjust income and expenses for inflation
+        inflated_income = annual_income * (1 + inflation_rate) ** year
+        inflated_expenses = annual_expenses * (1 + inflation_rate) ** year
         if current_age + year <= retirement_age:
-            annual_savings = annual_income - annual_expenses
+            annual_savings = inflated_income - inflated_expenses
         else:
             annual_savings = (
-                -annual_expenses
+                -inflated_expenses
             )  # In retirement, we're drawing down savings
-        new_worth = net_worth[-1] * (1 + growth_rate) + annual_savings
+
+            # Use real growth rate (nominal growth rate - inflation rate)
+        real_growth_rate = (1 + growth_rate) / (1 + inflation_rate) - 1
+        new_worth = net_worth[-1] * (1 + real_growth_rate) + annual_savings
         net_worth.append(max(0, new_worth))  # Ensure net worth doesn't go negative
     return net_worth
 
@@ -72,6 +78,13 @@ retirement_age = st.slider(
 life_expectancy = st.slider(
     "Life Expectancy", min_value=retirement_age + 1, max_value=120, value=85
 )
+inflation_rate = (
+    st.slider(
+        "Expected Annual Inflation Rate (%)", min_value=0.0, max_value=10.0, value=2.0
+    )
+    / 100
+)
+
 
 years_to_project = life_expectancy - current_age
 
@@ -86,6 +99,7 @@ projection = calculate_projection(
     total_annual_income,
     total_annual_expenses,
     growth_rate,
+    inflation_rate,
     years_to_project,
     retirement_age,
     current_age,
