@@ -1,9 +1,8 @@
-from projection import calculate_projection
-
-
+import streamlit as st
 import pandas as pd
 import plotly.express as px
-import streamlit as st
+import plotly.graph_objects as go
+from projection import calculate_projection
 
 
 def show_results_page():
@@ -15,21 +14,37 @@ def show_results_page():
 
     inputs = st.session_state.user_inputs
 
-    # Calculate combined figures
+    # Combine user and partner net worth breakdowns
+    combined_net_worth_breakdown = {}
+    for category in set(inputs["user_net_worth_breakdown"].keys()) | set(
+        inputs["partner_net_worth_breakdown"].keys()
+    ):
+        combined_value = (
+            inputs["user_net_worth_breakdown"].get(category, {"value": 0})["value"]
+            + inputs["partner_net_worth_breakdown"].get(category, {"value": 0})["value"]
+        )
+        combined_growth = max(
+            inputs["user_net_worth_breakdown"].get(category, {"growth": 0})["growth"],
+            inputs["partner_net_worth_breakdown"].get(category, {"growth": 0})[
+                "growth"
+            ],
+        )
+        combined_net_worth_breakdown[category] = {
+            "value": combined_value,
+            "growth": combined_growth,
+        }
+
     total_annual_income = inputs["user_annual_income"] + inputs["partner_annual_income"]
-    total_net_worth = inputs["user_net_worth"] + inputs["partner_net_worth"]
     total_annual_expenses = (
         inputs["user_annual_expenses"] + inputs["partner_annual_expenses"]
     )
-
     years_to_project = inputs["life_expectancy"] - inputs["current_age"]
 
     # Calculate projection
-    projection = calculate_projection(
-        total_net_worth,
+    projection, category_projections = calculate_projection(
+        combined_net_worth_breakdown,
         total_annual_income,
         total_annual_expenses,
-        inputs["growth_rate"],
         inputs["inflation_rate"],
         years_to_project,
         inputs["retirement_age"],
@@ -40,42 +55,118 @@ def show_results_page():
     df = pd.DataFrame(
         {
             "Year": range(inputs["current_age"], inputs["life_expectancy"] + 1),
-            "Net Worth": projection,
+            "Total Net Worth": projection,
+            **{category: values for category, values in category_projections.items()},
         }
     )
 
-    # Plot
-    fig = px.line(
-        df, x="Year", y="Net Worth", title="Projected Combined Net Worth Over Lifetime"
+    # Plot total net worth
+    fig_total = px.line(
+        df,
+        x="Year",
+        y="Total Net Worth",
+        title="Projected Combined Net Worth Over Lifetime",
     )
-    fig.update_layout(yaxis_title="Net Worth (£)")
-    fig.add_vline(
+    fig_total.update_layout(yaxis_title="Net Worth (£)")
+    fig_total.add_vline(
         x=inputs["retirement_age"],
         line_dash="dash",
         line_color="red",
         annotation_text="Retirement Age",
         annotation_position="top right",
     )
-    st.plotly_chart(fig)
+    st.plotly_chart(fig_total)
 
-    # Display some key metrics
+    # Plot breakdown of net worth
+    fig_breakdown = go.Figure()
+    for category in category_projections.keys():
+        fig_breakdown.add_trace(
+            go.Scatter(x=df["Year"], y=df[category], name=category, stackgroup="one")
+        )
+    fig_breakdown.update_layout(
+        title="Net Worth Breakdown Over Time", yaxis_title="Net Worth (£)"
+    )
+    st.plotly_chart(fig_breakdown)
+
+    # Display key metrics
     retirement_net_worth = projection[inputs["retirement_age"] - inputs["current_age"]]
     final_net_worth = projection[-1]
 
-    st.write(
-        f"Projected Combined Net Worth at Retirement (Age {inputs['retirement_age']}): £{retirement_net_worth:,.2f}"
-    )
-    st.write(
-        f"Projected Combined Net Worth at Life Expectancy (Age {inputs['life_expectancy']}): £{final_net_worth:,.2f}"
-    )
-
-    annual_retirement_income = retirement_net_worth * 0.04  # Using the 4% rule
-    st.write(
-        f"Estimated Annual Retirement Income (4% Rule): £{annual_retirement_income:,.2f}"
-    )
+    st.header("Key Metrics")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Net Worth at Retirement", f"£{retirement_net_worth:,.0f}")
+        st.metric("Final Net Worth", f"£{final_net_worth:,.0f}")
+    with col2:
+        annual_retirement_income = retirement_net_worth * 0.04  # Using the 4% rule
+        st.metric(
+            "Estimated Annual Retirement Income (4% Rule)",
+            f"£{annual_retirement_income:,.0f}",
+        )
+        years_of_expenses = final_net_worth / total_annual_expenses
+        st.metric("Years of Expenses Covered", f"{years_of_expenses:.1f}")
 
     # Display current combined figures
     st.header("Current Combined Figures")
-    st.write(f"Total Annual Income: £{total_annual_income:,.2f}")
-    st.write(f"Total Current Net Worth: £{total_net_worth:,.2f}")
-    st.write(f"Total Annual Expenses: £{total_annual_expenses:,.2f}")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total Annual Income", f"£{total_annual_income:,.0f}")
+        st.metric("Total Annual Expenses", f"£{total_annual_expenses:,.0f}")
+    with col2:
+        total_net_worth = sum(
+            data["value"] for data in combined_net_worth_breakdown.values()
+        )
+        st.metric("Total Current Net Worth", f"£{total_net_worth:,.0f}")
+        savings_rate = (
+            (total_annual_income - total_annual_expenses) / total_annual_income * 100
+        )
+        st.metric("Savings Rate", f"{savings_rate:.1f}%")
+
+    # Display net worth breakdown
+    st.header("Current Net Worth Breakdown")
+    breakdown_df = pd.DataFrame(
+        [
+            {
+                "Category": category,
+                "Value": data["value"],
+                "Growth Rate": f"{data['growth']*100:.1f}%",
+            }
+            for category, data in combined_net_worth_breakdown.items()
+        ]
+    )
+    breakdown_df = breakdown_df.sort_values("Value", ascending=False)
+    st.table(breakdown_df)
+
+    # Retirement readiness assessment
+    st.header("Retirement Readiness Assessment")
+    if retirement_net_worth >= total_annual_expenses * 25:
+        st.success("You're on track for a comfortable retirement!")
+    elif retirement_net_worth >= total_annual_expenses * 15:
+        st.warning(
+            "You're making progress, but might want to consider increasing your savings."
+        )
+    else:
+        st.error(
+            "You may need to significantly increase your savings or adjust your retirement plans."
+        )
+
+    # Suggestions
+    st.header("Suggestions")
+    if savings_rate < 20:
+        st.write(
+            "- Consider increasing your savings rate to at least 20% of your income."
+        )
+    if (
+        "Cash" in combined_net_worth_breakdown
+        and combined_net_worth_breakdown["Cash"]["value"] / total_net_worth > 0.3
+    ):
+        st.write(
+            "- You might have too much cash. Consider investing some for potentially higher returns."
+        )
+    if (
+        "Stocks" in combined_net_worth_breakdown
+        and combined_net_worth_breakdown["Stocks"]["value"] / total_net_worth < 0.4
+    ):
+        st.write(
+            "- Consider increasing your stock allocation for potentially higher long-term growth."
+        )
