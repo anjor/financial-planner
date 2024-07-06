@@ -16,6 +16,7 @@ def init_session_state():
             "partner_retirement_age": 65,
             "partner_life_expectancy": 85,
             "inflation_rate": 0.02,
+            "has_partner": False,
         }
     if "user_accounts" not in st.session_state:
         st.session_state.user_accounts = []
@@ -194,5 +195,6 @@ def show_input_page():
             "user_net_worth_breakdown": user_net_worth_breakdown,
             "partner_net_worth": partner_net_worth,
             "partner_net_worth_breakdown": partner_net_worth_breakdown,
+            "has_partner": has_partner,
         }
     )
