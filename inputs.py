@@ -12,6 +12,9 @@ def init_session_state():
             "current_age": 30,
             "retirement_age": 65,
             "life_expectancy": 85,
+            "partner_current_age": 30,
+            "partner_retirement_age": 65,
+            "partner_life_expectancy": 85,
             "inflation_rate": 0.02,
         }
     if "user_accounts" not in st.session_state:
@@ -79,8 +82,9 @@ def show_net_worth_breakdown(prefix):
 def show_input_page():
     st.title("UK Financial Planning Tool")
 
-    # Sidebar for Investment Assumptions
-    st.sidebar.header("Investment Assumptions")
+    # Sidebar for inputs
+    st.sidebar.header("Personal Information")
+    has_partner = st.sidebar.checkbox("Do you have a partner?")
 
     st.session_state.user_inputs["current_age"] = st.sidebar.number_input(
         "Current Age",
@@ -100,6 +104,34 @@ def show_input_page():
         max_value=120,
         value=st.session_state.user_inputs["life_expectancy"],
     )
+
+    if has_partner:
+        st.session_state.user_inputs["partner_current_age"] = st.sidebar.number_input(
+            "Partner Current Age",
+            min_value=18,
+            max_value=100,
+            value=st.session_state.user_inputs["partner_current_age"],
+        )
+        st.session_state.user_inputs["partner_retirement_age"] = (
+            st.sidebar.number_input(
+                "Partner Retirement Age",
+                min_value=st.session_state.user_inputs["partner_current_age"] + 1,
+                max_value=100,
+                value=st.session_state.user_inputs["partner_retirement_age"],
+            )
+        )
+        st.session_state.user_inputs["partner_life_expectancy"] = (
+            st.sidebar.number_input(
+                "Partner Life Expectancy",
+                min_value=st.session_state.user_inputs["partner_retirement_age"] + 1,
+                max_value=120,
+                value=st.session_state.user_inputs["partner_life_expectancy"],
+            )
+        )
+
+    # Sidebar for Investment Assumptions
+    st.sidebar.header("Investment Assumptions")
+
     st.session_state.user_inputs["inflation_rate"] = (
         st.sidebar.number_input(
             "Expected Annual Inflation Rate (%)",
@@ -113,26 +145,22 @@ def show_input_page():
     # Main content
     st.header("Enter Your Financial Information")
 
-    # Create two columns for User and Partner inputs
-    col1, col2 = st.columns(2)
+    st.subheader("You")
+    user_annual_income = st.number_input(
+        "Annual Income (£)",
+        min_value=0,
+        value=st.session_state.user_inputs["user_annual_income"],
+        key="user_income",
+    )
+    user_annual_expenses = st.number_input(
+        "Annual Expenses (£)",
+        min_value=0,
+        value=st.session_state.user_inputs["user_annual_expenses"],
+        key="user_expenses",
+    )
+    user_net_worth, user_net_worth_breakdown = show_net_worth_breakdown("user")
 
-    with col1:
-        st.subheader("You")
-        user_annual_income = st.number_input(
-            "Annual Income (£)",
-            min_value=0,
-            value=st.session_state.user_inputs["user_annual_income"],
-            key="user_income",
-        )
-        user_annual_expenses = st.number_input(
-            "Annual Expenses (£)",
-            min_value=0,
-            value=st.session_state.user_inputs["user_annual_expenses"],
-            key="user_expenses",
-        )
-        user_net_worth, user_net_worth_breakdown = show_net_worth_breakdown("user")
-
-    with col2:
+    if has_partner:
         st.subheader("Your Partner")
         partner_annual_income = st.number_input(
             "Annual Income (£)",
@@ -149,6 +177,11 @@ def show_input_page():
         partner_net_worth, partner_net_worth_breakdown = show_net_worth_breakdown(
             "partner"
         )
+    else:
+        partner_annual_income = 0
+        partner_annual_expenses = 0
+        partner_net_worth = 0
+        partner_net_worth_breakdown = {}
 
     # Update the session state with the latest values
     st.session_state.user_inputs.update(
