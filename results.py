@@ -149,24 +149,3 @@ def show_results_page():
         st.error(
             "You may need to significantly increase your savings or adjust your retirement plans."
         )
-
-    # Suggestions
-    st.header("Suggestions")
-    if savings_rate < 20:
-        st.write(
-            "- Consider increasing your savings rate to at least 20% of your income."
-        )
-    if (
-        "Cash" in combined_net_worth_breakdown
-        and combined_net_worth_breakdown["Cash"]["value"] / total_net_worth > 0.3
-    ):
-        st.write(
-            "- You might have too much cash. Consider investing some for potentially higher returns."
-        )
-    if (
-        "Stocks" in combined_net_worth_breakdown
-        and combined_net_worth_breakdown["Stocks"]["value"] / total_net_worth < 0.4
-    ):
-        st.write(
-            "- Consider increasing your stock allocation for potentially higher long-term growth."
-        )

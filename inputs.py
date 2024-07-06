@@ -6,9 +6,9 @@ def init_session_state():
     if "user_inputs" not in st.session_state:
         st.session_state.user_inputs = {
             "user_annual_income": 50000,
-            "user_annual_expenses": 40000,
+            "user_annual_expenses": 20000,
             "partner_annual_income": 50000,
-            "partner_annual_expenses": 40000,
+            "partner_annual_expenses": 20000,
             "current_age": 30,
             "retirement_age": 65,
             "life_expectancy": 85,
