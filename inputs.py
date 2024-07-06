@@ -148,7 +148,7 @@ def show_input_page():
 
     st.subheader("You")
     user_annual_income = st.number_input(
-        "Annual Income (£)",
+        "Post-tax Annual Income (£)",
         min_value=0,
         value=st.session_state.user_inputs["user_annual_income"],
         key="user_income",
@@ -164,7 +164,7 @@ def show_input_page():
     if has_partner:
         st.subheader("Your Partner")
         partner_annual_income = st.number_input(
-            "Annual Income (£)",
+            "Post-tax Annual Income (£)",
             min_value=0,
             value=st.session_state.user_inputs["partner_annual_income"],
             key="partner_income",
