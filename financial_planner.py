@@ -1,6 +1,6 @@
 import streamlit as st
 from results import show_results_page
-from inputs import show_input_page, init_session_state
+from inputs_page import show_input_page, init_session_state
 
 
 def main():
