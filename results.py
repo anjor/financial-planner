@@ -8,11 +8,8 @@ from projection import calculate_projection
 def show_results_page():
     st.title("UK Financial Planning Tool - Results")
 
-    if "user_inputs" not in st.session_state:
-        st.warning("Please enter your financial information on the Input page first.")
-        return
-
     inputs = st.session_state.user_inputs
+    age_inputs = st.session_state.age_inputs
 
     # Combine user and partner net worth breakdowns
     combined_net_worth_breakdown = {}
@@ -38,7 +35,7 @@ def show_results_page():
     total_annual_expenses = (
         inputs["user_annual_expenses"] + inputs["partner_annual_expenses"]
     )
-    years_to_project = inputs["life_expectancy"] - inputs["current_age"]
+    years_to_project = age_inputs["life_expectancy"] - age_inputs["current_age"]
 
     # Calculate projection
     projection, category_projections = calculate_projection(
@@ -47,14 +44,14 @@ def show_results_page():
         total_annual_expenses,
         inputs["inflation_rate"],
         years_to_project,
-        inputs["retirement_age"],
-        inputs["current_age"],
+        age_inputs["retirement_age"],
+        age_inputs["current_age"],
     )
 
     # Create DataFrame for plotting
     df = pd.DataFrame(
         {
-            "Year": range(inputs["current_age"], inputs["life_expectancy"] + 1),
+            "Year": range(age_inputs["current_age"], age_inputs["life_expectancy"] + 1),
             "Total Net Worth": projection,
             **{category: values for category, values in category_projections.items()},
         }
@@ -69,7 +66,7 @@ def show_results_page():
     )
     fig_total.update_layout(yaxis_title="Net Worth (£)")
     fig_total.add_vline(
-        x=inputs["retirement_age"],
+        x=age_inputs["retirement_age"],
         line_dash="dash",
         line_color="red",
         annotation_text="Retirement Age",
@@ -89,7 +86,9 @@ def show_results_page():
     st.plotly_chart(fig_breakdown)
 
     # Display key metrics
-    retirement_net_worth = projection[inputs["retirement_age"] - inputs["current_age"]]
+    retirement_net_worth = projection[
+        age_inputs["retirement_age"] - age_inputs["current_age"]
+    ]
     final_net_worth = projection[-1]
 
     st.header("Key Metrics")

@@ -1,11 +1,12 @@
 import streamlit as st
 from results import show_results_page
-from inputs import show_input_page, init_session_state
+from inputs_page import show_input_page
+from state import init_state
 
 
 def main():
     # Initialize session state
-    init_session_state()
+    init_state()
 
     st.set_page_config(
         page_title="UK Financial Planning Tool", page_icon="£", layout="wide"
