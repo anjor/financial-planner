@@ -1,15 +1,8 @@
 import streamlit as st
 from account import Account
 
-def init_assets_inputs():
-    if "user_accounts" not in st.session_state:
-        st.session_state.user_accounts = []
-    if "partner_accounts" not in st.session_state:
-        st.session_state.partner_accounts = []
 
 def show_assets_inputs(prefix):
-    if f"{prefix}_accounts" not in st.session_state:
-        st.session_state[f"{prefix}_accounts"] = []
     total = 0
     breakdown = {}
 
@@ -60,4 +53,6 @@ def show_assets_inputs(prefix):
         )
         st.session_state[f"{prefix}_accounts"].append(new_account)
         st.experimental_rerun()
-    return total, breakdown
+
+    st.session_state.user_inputs[f"{prefix}_net_worth"] = total
+    st.session_state.user_inputs[f"{prefix}_net_worth_breakdown"] = breakdown

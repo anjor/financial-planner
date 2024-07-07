@@ -1,30 +1,7 @@
 import streamlit as st
 from account import Account
-from inputs.income import init_income_inputs, show_income_inputs
-from inputs.assets import init_assets_inputs, show_assets_inputs
-
-
-def init_session_state():
-    init_income_inputs()
-    init_assets_inputs()
-    if "user_inputs" not in st.session_state:
-        st.session_state.user_inputs = {
-            "inflation_rate": 0.02,
-            "has_partner": False,
-        }
-    if "age_inputs" not in st.session_state:
-        st.session_state.age_inputs = {
-            "current_age": 30,
-            "retirement_age": 65,
-            "life_expectancy": 85,
-            "partner_current_age": 30,
-            "partner_retirement_age": 65,
-            "partner_life_expectancy": 85,
-        }
-    if "user_accounts" not in st.session_state:
-        st.session_state.user_accounts = []
-    if "partner_accounts" not in st.session_state:
-        st.session_state.partner_accounts = []
+from inputs.income import show_income_inputs
+from inputs.assets import show_assets_inputs
 
 
 def show_net_worth_breakdown(prefix):
@@ -37,6 +14,7 @@ def show_input_page():
     # Sidebar for inputs
     st.sidebar.header("Personal Information")
     has_partner = st.sidebar.checkbox("Do you have a partner?")
+    st.session_state.user_inputs["has_partner"] = has_partner
 
     st.session_state.age_inputs["current_age"] = st.sidebar.number_input(
         "Current Age",
