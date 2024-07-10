@@ -13,7 +13,11 @@ def show_input_page():
 
     # Sidebar for inputs
     st.sidebar.header("Personal Information")
-    has_partner = st.sidebar.checkbox("Do you have a partner?")
+    has_partner = st.sidebar.checkbox(
+        "Do you have a partner?",
+        value=st.session_state.user_inputs.get("has_partner", False),
+        key="has_partner_checkbox",
+    )
     st.session_state.user_inputs["has_partner"] = has_partner
 
     st.session_state.age_inputs["current_age"] = st.sidebar.number_input(
