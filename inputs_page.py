@@ -13,6 +13,11 @@ def show_input_page():
 
     # Sidebar for inputs
     st.sidebar.header("Personal Information")
+    inflation_rate = st.sidebar.number_input(
+        "Inflation Rate (%)", value=st.session_state.user_inputs["inflation_rate"] * 100
+    )
+    st.session_state.user_inputs["inflation_rate"] = inflation_rate / 100
+
     has_partner = st.sidebar.checkbox(
         "Do you have a partner?",
         value=st.session_state.user_inputs.get("has_partner", False),

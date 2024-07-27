@@ -36,7 +36,7 @@ def show_assets_inputs(prefix):
         with col4:
             if st.button("Remove", key=f"{prefix}_remove_{i}"):
                 st.session_state[f"{prefix}_accounts"].pop(i)
-                st.experimental_rerun()
+                st.rerun()
 
         total += account.value
         breakdown[account.name] = {
@@ -52,7 +52,7 @@ def show_assets_inputs(prefix):
             0.02,
         )
         st.session_state[f"{prefix}_accounts"].append(new_account)
-        st.experimental_rerun()
+        st.rerun()
 
     st.session_state.user_inputs[f"{prefix}_net_worth"] = total
     st.session_state.user_inputs[f"{prefix}_net_worth_breakdown"] = breakdown
