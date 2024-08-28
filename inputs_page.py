@@ -15,7 +15,7 @@ def show_input_page():
     st.sidebar.header("Personal Information")
     inflation_rate = st.sidebar.number_input(
         "Inflation Rate (%)", value=st.session_state.user_inputs["inflation_rate"] * 100
-    )
+    ) or 0
     st.session_state.user_inputs["inflation_rate"] = inflation_rate / 100
 
     has_partner = st.sidebar.checkbox(
