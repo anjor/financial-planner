@@ -1,49 +1,47 @@
-def calculate_projection(
-    net_worth_breakdown,
-    annual_income,
-    annual_expenses,
-    inflation_rate,
-    years,
-    retirement_age,
-    current_age,
-):
-    net_worth = {
-        category: [data["value"]] for category, data in net_worth_breakdown.items()
-    }
-    total_net_worth = [sum(net_worth[category][0] for category in net_worth)]
+def calculate_projection(net_worth_breakdown, annual_income, annual_expenses, inflation_rate, years_to_project, retirement_age, current_age):
+    projection = []
+    category_projections = {category: [] for category in net_worth_breakdown.keys()}
 
-    for year in range(1, years + 1):
-        # Adjust income and expenses for inflation
-        inflated_income = annual_income * (1 + inflation_rate) ** year
-        inflated_expenses = annual_expenses * (1 + inflation_rate) ** year
+    for year in range(years_to_project):
+        current_net_worth = sum(category["value"] for category in net_worth_breakdown.values())
+        projection.append(current_net_worth)
 
-        if current_age + year <= retirement_age:
-            annual_savings = inflated_income - inflated_expenses
-        else:
-            annual_savings = (
-                -inflated_expenses
-            )  # In retirement, we're drawing down savings
-
-        # Calculate new worth for each category
         for category, data in net_worth_breakdown.items():
-            growth_rate = data["growth"]
-            real_growth_rate = (1 + growth_rate) / (1 + inflation_rate) - 1
+            category_projections[category].append(data["value"])
 
-            # Distribute savings/withdrawals proportionally across categories
-            category_proportion = (
-                net_worth[category][-1] / total_net_worth[-1]
-                if total_net_worth[-1] > 0
-                else 0
-            )
-            category_savings = annual_savings * category_proportion
+        # Apply growth to all assets
+        for category, data in net_worth_breakdown.items():
+            data["value"] *= (1 + data["growth"])
 
-            new_category_worth = (
-                net_worth[category][-1] * (1 + real_growth_rate) + category_savings
-            )
-            net_worth[category].append(max(0, new_category_worth))
+        # Apply income and expenses
+        if current_age + year < retirement_age:
+            # Working years: add income, subtract expenses
+            net_change = annual_income - annual_expenses
+        else:
+            # Retirement: subtract expenses from liquid assets only
+            net_change = -annual_expenses
+            liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", False)}
+            total_liquid = sum(v["value"] for v in liquid_assets.values())
 
-        # Calculate total net worth
-        new_total_worth = sum(net_worth[category][-1] for category in net_worth)
-        total_net_worth.append(max(0, new_total_worth))
+            if total_liquid < annual_expenses:
+                # Not enough liquid assets, reduce all proportionally
+                for data in liquid_assets.values():
+                    data["value"] -= (data["value"] / total_liquid) * annual_expenses
+            else:
+                # Reduce liquid assets proportionally
+                for data in liquid_assets.values():
+                    data["value"] -= (data["value"] / total_liquid) * annual_expenses
 
-    return total_net_worth, net_worth
+        # Distribute net change across liquid assets
+        liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", False)}
+        total_liquid = sum(v["value"] for v in liquid_assets.values())
+        if total_liquid > 0:
+            for data in liquid_assets.values():
+                data["value"] += (data["value"] / total_liquid) * net_change
+
+        # Apply inflation to expenses
+        annual_expenses *= (1 + inflation_rate)
+
+        current_age += 1
+
+    return projection, category_projections

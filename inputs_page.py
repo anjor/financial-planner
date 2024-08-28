@@ -1,5 +1,4 @@
 import streamlit as st
-from account import Account
 from inputs.income import show_income_inputs
 from inputs.assets import show_assets_inputs
 

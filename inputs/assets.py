@@ -32,12 +32,13 @@ def show_assets_inputs(prefix):
                 ) or 0
             account.growth_rate /= 100
         with col4:
-            account.holdings_type = HoldingsType(st.selectbox(
+            selected_type = st.selectbox(
                 "Holdings Type",
-                options=[ht.value for ht in HoldingsType],
-                index=[ht.value for ht in HoldingsType].index(account.holdings_type.value),
+                options=[ht.name for ht in HoldingsType],
+                index=[ht.name for ht in HoldingsType].index(account.holdings_type.name),
                 key=f"{prefix}_type_{i}"
-            ))
+            )
+            account.holdings_type = HoldingsType[selected_type]
         with col5:
             if st.button("Remove", key=f"{prefix}_remove_{i}"):
                 st.session_state[f"{prefix}_accounts"].pop(i)

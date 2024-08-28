@@ -129,6 +129,7 @@ def show_results_page():
                 "Category": category,
                 "Value": data["value"],
                 "Growth Rate": f"{data['growth']*100:.1f}%",
+                "Liquidity": "Liquid" if data.get("is_liquid", False) else "Non-liquid"
             }
             for category, data in combined_net_worth_breakdown.items()
         ]

@@ -2,9 +2,14 @@ from enum import Enum
 
 
 class HoldingsType(Enum):
-    CASH = "cash"
-    S_AND_S = "stocks and shares"
-    PROPERTY = "property"
+    CASH = ("cash", True)
+    S_AND_S = ("stocks and shares", True)
+    PROPERTY = ("property", False)
+    OTHER = ("other", False)
+
+    def __init__(self, label, is_liquid):
+        self.label = label
+        self.is_liquid = is_liquid
 
 
 class Account:
@@ -13,6 +18,11 @@ class Account:
         self.holdings_type = holdings_type
         self.value = 0
         self.growth_rate = growth_rate
+
+    @property
+    def is_liquid(self):
+        return self.holdings_type.is_liquid
+
 
     def set_value(self, value):
         self.value = value
