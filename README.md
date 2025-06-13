@@ -2,6 +2,49 @@
 
 Basic financial planning tool. Built using extensive help from Claude Sonnet 3.5.
 
+## Installation
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management. Make sure you have uv installed:
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Install dependencies:
+
+```bash
+# Install all dependencies
+uv sync
+
+# Install with development dependencies
+uv sync --extra dev
+```
+
+## Running the Application
+
+```bash
+# Run the Streamlit app
+uv run streamlit run financial_planner.py
+```
+
+## Development
+
+```bash
+# Format code
+uv run black .
+uv run isort .
+
+# Lint code
+uv run ruff check .
+
+# Type checking
+uv run mypy .
+
+# Run tests (when available)
+uv run pytest
+```
+
 
 ## Prompt
 
