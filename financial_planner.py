@@ -4,7 +4,7 @@ from inputs_page import show_input_page
 from state import init_state
 
 
-def main():
+def main() -> None:
     # Initialize session state
     init_state()
 

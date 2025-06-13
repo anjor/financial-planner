@@ -1,7 +1,8 @@
 import streamlit as st
+from typing import Dict, Any
 
 
-def init_state():
+def init_state() -> None:
     # income and expenses
     if "user_inputs" not in st.session_state:
         st.session_state.user_inputs = {

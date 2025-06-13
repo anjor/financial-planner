@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_income_inputs():
+def show_income_inputs() -> None:
     st.sidebar.header("Income and Expenses Information")
     st.session_state.user_inputs["user_annual_income"] = st.sidebar.number_input(
         "Your Annual Income",

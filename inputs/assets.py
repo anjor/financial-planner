@@ -2,7 +2,7 @@ import streamlit as st
 from account import Account, HoldingsType
 
 
-def show_assets_inputs(prefix):
+def show_assets_inputs(prefix: str) -> None:
     total = 0
     breakdown = {}
 
@@ -48,6 +48,7 @@ def show_assets_inputs(prefix):
         breakdown[account.name] = {
             "value": account.value,
             "growth": account.growth_rate,
+            "is_liquid": account.is_liquid,
         }
 
     # Add new account button

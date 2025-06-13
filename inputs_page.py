@@ -3,11 +3,11 @@ from inputs.income import show_income_inputs
 from inputs.assets import show_assets_inputs
 
 
-def show_net_worth_breakdown(prefix):
+def show_net_worth_breakdown(prefix: str) -> None:
     return show_assets_inputs(prefix)
 
 
-def show_input_page():
+def show_input_page() -> None:
     st.title("UK Financial Planning Tool")
 
     # Sidebar for inputs

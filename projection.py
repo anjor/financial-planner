@@ -1,4 +1,15 @@
-def calculate_projection(net_worth_breakdown, annual_income, annual_expenses, inflation_rate, years_to_project, retirement_age, current_age):
+from typing import Dict, List, Tuple, Any
+
+
+def calculate_projection(
+    net_worth_breakdown: Dict[str, Dict[str, Any]], 
+    annual_income: float, 
+    annual_expenses: float, 
+    inflation_rate: float, 
+    years_to_project: int, 
+    retirement_age: int, 
+    current_age: int
+) -> Tuple[List[float], Dict[str, List[float]]]:
     projection = []
     category_projections = {category: [] for category in net_worth_breakdown.keys()}
 
@@ -17,27 +28,26 @@ def calculate_projection(net_worth_breakdown, annual_income, annual_expenses, in
         if current_age + year < retirement_age:
             # Working years: add income, subtract expenses
             net_change = annual_income - annual_expenses
+            # Distribute net change across liquid assets
+            liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", True)}
+            total_liquid = sum(v["value"] for v in liquid_assets.values())
+            if total_liquid > 0 and net_change != 0:
+                for data in liquid_assets.values():
+                    data["value"] += (data["value"] / total_liquid) * net_change
         else:
             # Retirement: subtract expenses from liquid assets only
-            net_change = -annual_expenses
-            liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", False)}
+            liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", True)}
             total_liquid = sum(v["value"] for v in liquid_assets.values())
 
-            if total_liquid < annual_expenses:
-                # Not enough liquid assets, reduce all proportionally
-                for data in liquid_assets.values():
-                    data["value"] -= (data["value"] / total_liquid) * annual_expenses
-            else:
-                # Reduce liquid assets proportionally
-                for data in liquid_assets.values():
-                    data["value"] -= (data["value"] / total_liquid) * annual_expenses
-
-        # Distribute net change across liquid assets
-        liquid_assets = {k: v for k, v in net_worth_breakdown.items() if v.get("is_liquid", False)}
-        total_liquid = sum(v["value"] for v in liquid_assets.values())
-        if total_liquid > 0:
-            for data in liquid_assets.values():
-                data["value"] += (data["value"] / total_liquid) * net_change
+            if total_liquid > 0:
+                if total_liquid >= annual_expenses:
+                    # Reduce liquid assets proportionally
+                    for data in liquid_assets.values():
+                        data["value"] -= (data["value"] / total_liquid) * annual_expenses
+                else:
+                    # Not enough liquid assets, withdraw what we can
+                    for data in liquid_assets.values():
+                        data["value"] = 0
 
         # Apply inflation to expenses
         annual_expenses *= (1 + inflation_rate)
