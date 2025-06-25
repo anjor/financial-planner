@@ -16,6 +16,8 @@ dependencies = [
     "pandas==2.2.2",
     "plotly==5.22.0",
     "streamlit==1.36.0",
+    "supabase>=2.0.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]

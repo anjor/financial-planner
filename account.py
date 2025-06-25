@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any
+from typing import Any
 
 
 class HoldingsType(Enum):
@@ -30,7 +30,7 @@ class Account:
     def set_growth_rate(self, growth_rate: float) -> None:
         self.growth_rate = growth_rate
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "type": self.holdings_type,
