@@ -1,6 +1,7 @@
 import streamlit as st
-from inputs.income import show_income_inputs
+
 from inputs.assets import show_assets_inputs
+from inputs.income import show_income_inputs
 
 
 def show_net_worth_breakdown(prefix: str) -> None:

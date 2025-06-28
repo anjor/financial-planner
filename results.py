@@ -1,13 +1,15 @@
-import streamlit as st
+from typing import Any
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Dict, List, Tuple, Any
+import streamlit as st
+
 from projection import calculate_projection
 from validation import display_validation_errors
 
 
-def _combine_net_worth_breakdowns(inputs: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+def _combine_net_worth_breakdowns(inputs: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """Combine user and partner net worth breakdowns."""
     combined_net_worth_breakdown = {}
     for category in set(inputs["user_net_worth_breakdown"].keys()) | set(
@@ -27,7 +29,7 @@ def _combine_net_worth_breakdowns(inputs: Dict[str, Any]) -> Dict[str, Dict[str,
         user_liquid = inputs["user_net_worth_breakdown"].get(category, {}).get("is_liquid", False)
         partner_liquid = inputs["partner_net_worth_breakdown"].get(category, {}).get("is_liquid", False)
         is_liquid = user_liquid or partner_liquid
-        
+
         combined_net_worth_breakdown[category] = {
             "value": combined_value,
             "growth": combined_growth,
@@ -37,9 +39,9 @@ def _combine_net_worth_breakdowns(inputs: Dict[str, Any]) -> Dict[str, Dict[str,
 
 
 def _create_projection_dataframe(
-    projection: List[float], 
-    category_projections: Dict[str, List[float]], 
-    age_inputs: Dict[str, Any]
+    projection: list[float],
+    category_projections: dict[str, list[float]],
+    age_inputs: dict[str, Any]
 ) -> pd.DataFrame:
     """Create DataFrame for plotting from projection data."""
     return pd.DataFrame(
@@ -51,7 +53,7 @@ def _create_projection_dataframe(
     )
 
 
-def _plot_total_net_worth(df: pd.DataFrame, age_inputs: Dict[str, Any]) -> None:
+def _plot_total_net_worth(df: pd.DataFrame, age_inputs: dict[str, Any]) -> None:
     """Plot total net worth over time."""
     fig_total = px.line(
         df,
@@ -70,7 +72,7 @@ def _plot_total_net_worth(df: pd.DataFrame, age_inputs: Dict[str, Any]) -> None:
     st.plotly_chart(fig_total)
 
 
-def _plot_net_worth_breakdown(df: pd.DataFrame, category_projections: Dict[str, List[float]]) -> None:
+def _plot_net_worth_breakdown(df: pd.DataFrame, category_projections: dict[str, list[float]]) -> None:
     """Plot breakdown of net worth over time."""
     fig_breakdown = go.Figure()
     for category in category_projections.keys():
@@ -84,8 +86,8 @@ def _plot_net_worth_breakdown(df: pd.DataFrame, category_projections: Dict[str, 
 
 
 def _display_key_metrics(
-    projection: List[float], 
-    age_inputs: Dict[str, Any], 
+    projection: list[float],
+    age_inputs: dict[str, Any],
     total_annual_expenses: float
 ) -> None:
     """Display key retirement metrics."""
@@ -110,9 +112,9 @@ def _display_key_metrics(
 
 
 def _display_current_figures(
-    total_annual_income: float, 
-    total_annual_expenses: float, 
-    combined_net_worth_breakdown: Dict[str, Dict[str, Any]]
+    total_annual_income: float,
+    total_annual_expenses: float,
+    combined_net_worth_breakdown: dict[str, dict[str, Any]]
 ) -> None:
     """Display current combined financial figures."""
     st.header("Current Combined Figures")
@@ -132,7 +134,7 @@ def _display_current_figures(
         st.metric("Savings Rate", f"{savings_rate:.1f}%")
 
 
-def _display_net_worth_breakdown(combined_net_worth_breakdown: Dict[str, Dict[str, Any]]) -> None:
+def _display_net_worth_breakdown(combined_net_worth_breakdown: dict[str, dict[str, Any]]) -> None:
     """Display current net worth breakdown table."""
     st.header("Current Net Worth Breakdown")
     breakdown_df = pd.DataFrame(
@@ -151,15 +153,15 @@ def _display_net_worth_breakdown(combined_net_worth_breakdown: Dict[str, Dict[st
 
 
 def _display_retirement_assessment(
-    projection: List[float], 
-    age_inputs: Dict[str, Any], 
+    projection: list[float],
+    age_inputs: dict[str, Any],
     total_annual_expenses: float
 ) -> None:
     """Display retirement readiness assessment."""
     retirement_net_worth = projection[
         age_inputs["retirement_age"] - age_inputs["current_age"]
     ]
-    
+
     st.header("Retirement Readiness Assessment")
     if retirement_net_worth >= total_annual_expenses * 25:
         st.success("You're on track for a comfortable retirement!")
@@ -206,7 +208,7 @@ def show_results_page() -> None:
 
     # Create DataFrame and display results
     df = _create_projection_dataframe(projection, category_projections, age_inputs)
-    
+
     # Display all components
     _plot_total_net_worth(df, age_inputs)
     _plot_net_worth_breakdown(df, category_projections)

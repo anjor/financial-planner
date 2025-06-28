@@ -21,6 +21,15 @@ uv sync
 uv sync --extra dev
 ```
 
+## Database Setup
+
+This application uses Supabase for data persistence. See [SUPABASE_SETUP.md](SUPABASE_SETUP.md) for detailed setup instructions.
+
+Quick setup:
+1. Create a Supabase project
+2. Run the SQL schema from `schema.sql`
+3. Copy `.env.example` to `.env` and add your Supabase credentials
+
 ## Running the Application
 
 ```bash

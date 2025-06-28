@@ -1,15 +1,15 @@
-from typing import Dict, List, Tuple, Any
+from typing import Any
 
 
 def calculate_projection(
-    net_worth_breakdown: Dict[str, Dict[str, Any]], 
-    annual_income: float, 
-    annual_expenses: float, 
-    inflation_rate: float, 
-    years_to_project: int, 
-    retirement_age: int, 
+    net_worth_breakdown: dict[str, dict[str, Any]],
+    annual_income: float,
+    annual_expenses: float,
+    inflation_rate: float,
+    years_to_project: int,
+    retirement_age: int,
     current_age: int
-) -> Tuple[List[float], Dict[str, List[float]]]:
+) -> tuple[list[float], dict[str, list[float]]]:
     projection = []
     category_projections = {category: [] for category in net_worth_breakdown.keys()}
 
