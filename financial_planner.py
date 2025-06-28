@@ -8,12 +8,12 @@ from state import init_state
 
 
 def main() -> None:
-    # Initialize session state
-    init_state()
-
     st.set_page_config(
         page_title="UK Financial Planning Tool", page_icon="£", layout="wide"
     )
+
+    # Initialize session state
+    init_state()
 
     # Check authentication first
     if not require_auth():
